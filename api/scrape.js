@@ -2,7 +2,12 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import sanitizeHtml from 'sanitize-html';
 
+// Vercel serverless function format
 export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -70,7 +75,19 @@ export default async function handler(req, res) {
     console.log(`[Scraper] Found ${nodes.length} nodes matching "${primarySelector}"`);
 
     if (nodes.length === 0) {
-      throw new Error(`No elements found with selector "${primarySelector}"`);
+      // Check if the page is likely client-side rendered
+      const htmlContent = response.data.toLowerCase();
+      const isLikelySPA = htmlContent.includes('<script') && 
+                         (htmlContent.includes('react') || htmlContent.includes('vue') || htmlContent.includes('angular'));
+      
+      let errorMsg = `No elements found with selector "${primarySelector}"`;
+      if (isLikelySPA) {
+        errorMsg += '. This site appears to use client-side rendering (React/Vue/Angular). Axios/Cheerio cannot execute JavaScript. Try using a browser automation tool like Playwright or Puppeteer for JavaScript-heavy sites.';
+      } else {
+        errorMsg += '. The selector might be incorrect or the page structure has changed.';
+      }
+      
+      throw new Error(errorMsg);
     }
 
     for (const node of nodes) {
