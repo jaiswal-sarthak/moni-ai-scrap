@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: moni-ai-scrap
+    env: node
+    buildCommand: npm install && npx playwright install chromium
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+        optional: true
+      - key: SCRAPER_PORT
+        value: 10000
+    healthCheckPath: /api/health
+
