@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraper - Modern & Fast</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>Web Scraper</h1>
+                    <p class="subtitle">Fast, modern, and powerful web scraping tool</p>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="card">
+            <h2>Scrape Configuration</h2>
+            
+            <div class="form-group">
+                <label>Quick Presets:</label>
+                <div class="presets-grid">
+                    <button class="preset-btn" onclick="loadPreset('hackernews')" title="HackerNews - Top Stories">
+                        <img src="https://www.google.com/s2/favicons?domain=news.ycombinator.com&sz=32" alt="HackerNews" class="preset-icon">
+                        <span class="preset-name">HackerNews</span>
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('producthunt')" title="Product Hunt - Trending">
+                        <img src="https://www.google.com/s2/favicons?domain=producthunt.com&sz=32" alt="Product Hunt" class="preset-icon">
+                        <span class="preset-name">Product Hunt</span>
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('reddit')" title="Reddit - Popular">
+                        <img src="https://www.google.com/s2/favicons?domain=reddit.com&sz=32" alt="Reddit" class="preset-icon">
+                        <span class="preset-name">Reddit</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="url">Target URL:</label>
+                <input 
+                    type="url" 
+                    id="url" 
+                    placeholder="https://example.com" 
+                    value="https://news.ycombinator.com"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="instruction">Instruction (e.g., "top 5", "first 10", "limit 20"):</label>
+                <input 
+                    type="text" 
+                    id="instruction" 
+                    placeholder="top 5 (optional - limits results)"
+                    title="Examples: 'top 5', 'first 10', 'limit 20'"
+                >
+                <small class="form-hint">Optional: Use to limit results (e.g., "top 5" shows only first 5 items)</small>
+            </div>
+
+            <div class="form-group">
+                <label>Selectors:</label>
+                <div id="selectors-container">
+                    <div class="selector-item">
+                        <input type="text" placeholder="field (e.g., container)" value="container" class="field-input">
+                        <input type="text" placeholder="selector (e.g., .item)" value=".athing" class="selector-input">
+                        <input type="text" placeholder="attribute (optional)" class="attr-input">
+                        <button class="btn-remove" onclick="removeSelector(this)" title="Remove selector">×</button>
+                    </div>
+                    <div class="selector-item">
+                        <input type="text" placeholder="field" value="title" class="field-input">
+                        <input type="text" placeholder="selector" value=".titleline > a" class="selector-input">
+                        <input type="text" placeholder="attribute" value="" class="attr-input">
+                        <button class="btn-remove" onclick="removeSelector(this)" title="Remove selector">×</button>
+                    </div>
+                    <div class="selector-item">
+                        <input type="text" placeholder="field" value="link" class="field-input">
+                        <input type="text" placeholder="selector" value=".titleline > a" class="selector-input">
+                        <input type="text" placeholder="attribute" value="href" class="attr-input">
+                        <button class="btn-remove" onclick="removeSelector(this)" title="Remove selector">×</button>
+                    </div>
+                </div>
+                <button class="btn-secondary" onclick="addSelector()">
+                    <span>+</span> Add Selector
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="saveToDb">
+                    Save results to database (requires Supabase config)
+                </label>
+            </div>
+
+            <button class="btn-primary" onclick="runScrape()" id="scrape-btn">
+                <span>🚀</span> Start Scraping
+            </button>
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="status" class="status hidden"></div>
+
+        <div id="results" class="card hidden">
+            <div class="results-header">
+                <div>
+                    <h2>Results <span id="results-count"></span></h2>
+                    <div id="results-stats" class="results-stats"></div>
+                </div>
+                <div class="results-actions">
+                    <input 
+                        type="text" 
+                        id="results-search" 
+                        placeholder="🔍 Search results..." 
+                        class="search-input"
+                        style="display: none;"
+                    >
+                    <button class="btn-icon" onclick="copyAllResults()" title="Copy all URLs">
+                        📋
+                    </button>
+                    <button class="btn-icon" onclick="exportResultsAs('json')" title="Export as JSON">
+                        💾
+                    </button>
+                    <button class="btn-icon" onclick="exportResultsAs('csv')" title="Export as CSV">
+                        📊
+                    </button>
+                </div>
+            </div>
+            <div id="results-list"></div>
+            <div id="results-empty" class="hidden empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <div class="empty-state-text">No results match your search</div>
+            </div>
+        </div>
+
+        <div id="history-section" class="card history-section hidden">
+            <div class="history-header">
+                <h2>History</h2>
+                <button class="btn-secondary" onclick="clearHistory()" id="clear-history-btn">
+                    Clear All
+                </button>
+            </div>
+            <div id="history-list"></div>
+            <div id="history-empty" class="hidden empty-state">
+                <div class="empty-state-icon">📋</div>
+                <div class="empty-state-text">No scrapes in history yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
