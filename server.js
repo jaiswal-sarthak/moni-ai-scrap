@@ -194,8 +194,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Standalone Scraper running on http://localhost:${PORT}`);
-  console.log(`📁 Serving from: ${__dirname}`);
-});
+// For local development
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Standalone Scraper running on http://localhost:${PORT}`);
+    console.log(`📁 Serving from: ${__dirname}`);
+  });
+}
+
+// Export for Vercel serverless
+export default app;
 
