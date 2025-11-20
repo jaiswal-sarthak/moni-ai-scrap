@@ -20,10 +20,10 @@ Use these exact settings in Render dashboard:
 
 6. **Build Command**: 
    ```
-   npm install && npx playwright install chromium
+   npm install
    ```
-   - This installs dependencies AND Playwright browser
-   - Required for scraping functionality
+   - This installs all dependencies (axios, cheerio, express, etc.)
+   - No browser binaries needed - uses lightweight HTTP scraping
 
 7. **Start Command**: 
    ```
